@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>날짜/시간 선택 — 예약하기 4/5</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="brand">
+      <span class="brand-mark">해담</span><span class="brand-sub">의원</span>
+    </a>
+    <nav class="topnav">
+      <a href="/">홈</a>
+      <a href="/reserve/step1" class="active">예약하기</a>
+      <a href="/reserve/lookup">예약조회</a>
+      <a href="/records">진료기록</a>
+    </nav>
+  </div>
+</header>
+
+<main class="flow-shell">
+  <div class="stepper">
+    <div class="step-dot-wrap done"><div class="step-dot">✓</div><span class="step-label">환자정보</span></div>
+    <div class="step-line done"></div>
+    <div class="step-dot-wrap done"><div class="step-dot">✓</div><span class="step-label">진료과</span></div>
+    <div class="step-line done"></div>
+    <div class="step-dot-wrap done"><div class="step-dot">✓</div><span class="step-label">의사선택</span></div>
+    <div class="step-line done"></div>
+    <div class="step-dot-wrap current"><div class="step-dot">4</div><span class="step-label">날짜시간</span></div>
+    <div class="step-line"></div>
+    <div class="step-dot-wrap"><div class="step-dot">5</div><span class="step-label">완료</span></div>
+  </div>
+
+  <div class="flow-card">
+    <h2 id="doctor-title">날짜와 시간을 선택해주세요</h2>
+    <p class="flow-sub">예약 가능한 일정만 표시됩니다</p>
+
+    <div class="date-picker-row" id="date-row"></div>
+
+    <div class="slot-grid" id="slot-grid"></div>
+
+    <div class="btn-row">
+      <a href="/reserve/step3" class="btn btn-secondary">이전</a>
+      <button class="btn btn-primary" id="next-btn" onclick="goNext()" disabled>예약 완료하기</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const doctorName = sessionStorage.getItem('reservation_doctor_name');
+const doctorId = sessionStorage.getItem('reservation_doctor_id');
+if (!doctorName || !doctorId) { window.location.href = '/reserve/step3'; }
+document.getElementById('doctor-title').textContent = `${doctorName} 선생님 진료 일정`;
+
+const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+const dateRow = document.getElementById('date-row');
+const slotGrid = document.getElementById('slot-grid');
+
+let selectedDateIdx = null;
+let selectedSlot = null;
+
+const today = new Date();
+for (let i = 0; i < 7; i++) {
+  const d = new Date(today);
+  d.setDate(today.getDate() + i);
+  const chip = document.createElement('div');
+  chip.className = 'date-chip';
+  chip.dataset.idx = i;
+  chip.innerHTML = `<div class="dow">${DOW[d.getDay()]}</div><div class="dnum">${d.getDate()}</div>`;
+  chip.addEventListener('click', () => selectDate(i, d, chip));
+  dateRow.appendChild(chip);
+  if (i === 0) selectDate(0, d, chip);
+}
+
+function selectDate(idx, dateObj, chipEl) {
+  document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
+  chipEl.classList.add('selected');
+  selectedDateIdx = idx;
+  selectedSlot = null;
+  document.getElementById('next-btn').disabled = true;
+  const isoDate = dateObj.toISOString().slice(0, 10);
+  sessionStorage.setItem('reservation_date', isoDate);
+  loadSlots(isoDate);
+}
+
+async function loadSlots(isoDate) {
+  slotGrid.innerHTML = '<p class="empty-state">불러오는 중...</p>';
+  try {
+    const res = await fetch(`/api/slots?doctor_id=${doctorId}&date=${isoDate}`);
+    const data = await res.json();
+    renderSlots(data.all, data.booked);
+  } catch (e) {
+    slotGrid.innerHTML = '<p class="empty-state">일정을 불러오지 못했습니다</p>';
+  }
+}
+
+function renderSlots(allSlots, booked) {
+  slotGrid.innerHTML = '';
+  allSlots.forEach(slot => {
+    const btn = document.createElement('div');
+    btn.className = 'slot-btn' + (booked.includes(slot) ? ' disabled' : '');
+    btn.textContent = slot;
+    if (!booked.includes(slot)) {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.slot-btn').forEach(s => s.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedSlot = slot;
+        sessionStorage.setItem('reservation_time', slot);
+        document.getElementById('next-btn').disabled = false;
+      });
+    }
+    slotGrid.appendChild(btn);
+  });
+}
+
+async function goNext() {
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.disabled = true;
+  try {
+    const res = await fetch('/api/appointments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patient_id: sessionStorage.getItem('reservation_patient_id'),
+        doctor_id: doctorId,
+        date: sessionStorage.getItem('reservation_date'),
+        time: sessionStorage.getItem('reservation_time'),
+      }),
+    });
+    if (!res.ok) throw new Error('예약 생성 실패');
+    const data = await res.json();
+    sessionStorage.setItem('reservation_code', data.code);
+    window.location.href = '/reserve/step5';
+  } catch (e) {
+    alert('예약 처리 중 오류가 발생했습니다.');
+    nextBtn.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>

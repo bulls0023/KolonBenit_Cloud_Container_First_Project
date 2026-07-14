@@ -1,0 +1,83 @@
+# =====================================================================
+# Flask(WAS) Deployment + NodePort Service
+# WAS1(10.10.1.20), WAS2(10.10.1.22) 두 워커에 스케줄링됨 (기본 스케줄러가 분산 배치)
+# 이미지: Harbor(DEVOPS 노드, 10.10.1.120)에 푸시된 이미지 사용 예정
+#         (Harbor 설치 전까지는 image 값을 로컬 빌드 이미지로 임시 교체해서 사용)
+# =====================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: was-deployment
+  namespace: hospital
+  labels:
+    app: was
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: was
+  template:
+    metadata:
+      labels:
+        app: was
+    spec:
+      imagePullSecrets:
+        - name: harbor-pull-secret
+      containers:
+        - name: was
+          image: 10.10.1.120/hospital/was-app:45db676
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: was-config
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_DATABASE
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: was-svc
+  namespace: hospital
+spec:
+  type: NodePort
+  selector:
+    app: was
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30080
+      protocol: TCP

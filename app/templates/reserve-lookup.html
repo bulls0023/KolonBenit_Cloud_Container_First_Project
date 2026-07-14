@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약조회 — 해담의원</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="brand">
+      <span class="brand-mark">해담</span><span class="brand-sub">의원</span>
+    </a>
+    <nav class="topnav">
+      <a href="/">홈</a>
+      <a href="/reserve/step1">예약하기</a>
+      <a href="/reserve/lookup" class="active">예약조회</a>
+      <a href="/records">진료기록</a>
+    </nav>
+  </div>
+</header>
+
+<main class="flow-shell" style="max-width:760px;">
+  <div class="list-header">
+    <h1>예약조회</h1>
+    <p>환자명을 입력하면 전체 예약 목록을 확인할 수 있습니다</p>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" class="field-input" id="search-name" placeholder="환자 이름을 입력하세요 (예: 홍길동)">
+    <button class="btn btn-primary" onclick="search()">조회</button>
+  </div>
+
+  <div id="result-list"></div>
+</main>
+
+<script>
+const STATUS_CLASS = { '예약완료': 'status-confirmed', '진료완료': 'status-done', '취소': 'status-cancelled' };
+
+async function search() {
+  const name = document.getElementById('search-name').value.trim();
+  const list = document.getElementById('result-list');
+
+  if (!name) {
+    list.innerHTML = '<div class="empty-state">환자 이름을 입력해주세요</div>';
+    return;
+  }
+
+  list.innerHTML = '<div class="empty-state">조회 중...</div>';
+
+  try {
+    const res = await fetch(`/api/appointments?patient_name=${encodeURIComponent(name)}`);
+    const results = await res.json();
+
+    if (!results.length) {
+      list.innerHTML = `<div class="empty-state">‘${name}’으로 등록된 예약이 없습니다</div>`;
+      return;
+    }
+
+    list.innerHTML = results.map(r => `
+      <div class="record-card" id="appt-${r.id}">
+        <div class="record-top">
+          <span class="record-date">${formatDate(r.date)} · ${r.time}</span>
+          <span class="status-pill ${STATUS_CLASS[r.status]}">${r.status}</span>
+        </div>
+        <div class="record-meta"><b>${r.dept}</b> · ${r.doctor} 선생님</div>
+        ${r.status === '예약완료' ? `
+          <div class="btn-row" style="margin-top:14px;">
+            <button class="btn btn-secondary" onclick="event.stopPropagation(); cancelAppt(${r.id})">예약 취소</button>
+          </div>` : ''}
+      </div>
+    `).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="empty-state">조회 중 오류가 발생했습니다</div>';
+  }
+}
+
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+}
+
+async function cancelAppt(id) {
+  if (!confirm('이 예약을 취소하시겠습니까?')) return;
+  try {
+    await fetch(`/api/appointments/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: '취소' }),
+    });
+    const card = document.getElementById(`appt-${id}`);
+    card.querySelector('.status-pill').className = 'status-pill status-cancelled';
+    card.querySelector('.status-pill').textContent = '취소';
+    card.querySelector('.btn-row').remove();
+  } catch (e) {
+    alert('취소 처리 중 오류가 발생했습니다.');
+  }
+}
+
+document.getElementById('search-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') search();
+});
+</script>
+
+</body>
+</html>

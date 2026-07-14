@@ -1,0 +1,489 @@
+/* =====================================================================
+   해담의원 — 디자인 시스템
+   팔레트: 세이지 그린 + 차콜 + 따뜻한 아이보리 (차갑지 않은 의료 톤)
+   타이포: Pretendard(본문) + Source Serif 4(헤딩, 신뢰감)
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+:root {
+  --ivory: #FAF7F0;
+  --paper: #FFFFFF;
+  --ink: #1F2A24;
+  --ink-soft: #4B5A50;
+  --sage: #3E6B57;
+  --sage-deep: #2A4B3D;
+  --sage-pale: #E4EEE7;
+  --sage-paler: #F1F6F2;
+  --terracotta: #C66B3D;
+  --line: #DDE3DC;
+  --font-display: 'Source Serif 4', serif;
+  --font-body: 'Noto Sans KR', sans-serif;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--ivory);
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+img, svg { display: block; max-width: 100%; }
+
+/* ── Topbar ── */
+.topbar {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-display);
+}
+.brand-mark { font-size: 22px; font-weight: 600; color: var(--sage-deep); }
+.brand-sub { font-size: 14px; color: var(--ink-soft); }
+
+.topnav { display: flex; gap: 32px; }
+.topnav a {
+  font-size: 15px;
+  color: var(--ink-soft);
+  padding: 6px 2px;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.topnav a:hover { color: var(--sage-deep); }
+.topnav a.active { color: var(--sage-deep); border-color: var(--sage-deep); font-weight: 500; }
+
+/* ── Hero ── */
+.hero {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 88px 28px 96px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 40px;
+}
+.hero-eyebrow {
+  font-size: 14px;
+  color: var(--sage);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  margin-bottom: 18px;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1.32;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+.hero-desc {
+  font-size: 16px;
+  color: var(--ink-soft);
+  margin-bottom: 36px;
+}
+.cta-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--sage-deep);
+  color: var(--ivory);
+  font-size: 16px;
+  font-weight: 500;
+  padding: 16px 30px;
+  border-radius: var(--radius);
+  transition: background .15s, transform .15s;
+}
+.cta-primary:hover { background: var(--sage); transform: translateY(-1px); }
+
+.hero-figure {
+  display: flex;
+  justify-content: center;
+  color: var(--sage);
+}
+.pulse-svg { width: 280px; height: 280px; }
+.pulse-ring {
+  fill: none;
+  stroke: var(--sage-pale);
+  stroke-width: 1.5;
+}
+.pulse-ring.r2 { stroke: var(--sage-paler); r: 130; }
+.pulse-line { color: var(--terracotta); }
+
+/* ── Menu grid ── */
+.menu-grid {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 28px 96px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+.menu-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.menu-card:hover {
+  border-color: var(--sage);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -16px rgba(42, 75, 61, 0.35);
+}
+.menu-num {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--sage);
+  font-weight: 500;
+}
+.menu-card h3 {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+}
+.menu-card p {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+/* ── Department section ── */
+.dept-section {
+  background: var(--sage-paler);
+  padding: 88px 28px;
+}
+.section-head { max-width: 1080px; margin: 0 auto 40px; }
+.section-eyebrow { font-size: 14px; color: var(--sage); font-weight: 500; margin-bottom: 14px; }
+.dept-section h2 {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.dept-list {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.dept-item {
+  background: var(--paper);
+  border-radius: var(--radius);
+  padding: 24px;
+  border: 1px solid var(--line);
+}
+.dept-tag {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--sage-deep);
+  margin-bottom: 10px;
+}
+.dept-item p { font-size: 14px; color: var(--ink-soft); }
+
+/* ── Footer ── */
+.site-footer {
+  text-align: center;
+  padding: 32px 28px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+}
+
+/* =====================================================================
+   예약 흐름 공용 (step pages)
+   ===================================================================== */
+.flow-shell {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 56px 28px 100px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 48px;
+}
+.step-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.step-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+}
+.step-dot-wrap.done .step-dot { background: var(--sage-deep); border-color: var(--sage-deep); color: var(--ivory); }
+.step-dot-wrap.current .step-dot { border-color: var(--sage-deep); color: var(--sage-deep); }
+.step-label { font-size: 12px; color: var(--ink-soft); }
+.step-dot-wrap.current .step-label { color: var(--sage-deep); font-weight: 500; }
+.step-line {
+  flex: 0.6;
+  height: 1.5px;
+  background: var(--line);
+  margin-top: -22px;
+}
+.step-line.done { background: var(--sage-deep); }
+
+.flow-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 36px;
+}
+.flow-card h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.flow-sub {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+
+.field-group { margin-bottom: 22px; }
+.field-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.field-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 15px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--ivory);
+  color: var(--ink);
+  transition: border-color .15s;
+}
+.field-input:focus {
+  outline: none;
+  border-color: var(--sage-deep);
+  background: var(--paper);
+}
+.field-hint { font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; }
+
+.btn-row { display: flex; gap: 12px; margin-top: 32px; }
+.btn {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 0;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  transition: background .15s, color .15s, border-color .15s;
+  font-family: var(--font-body);
+}
+.btn-primary { background: var(--sage-deep); color: var(--ivory); }
+.btn-primary:hover { background: var(--sage); }
+.btn-primary:disabled { background: var(--line); color: var(--ink-soft); cursor: not-allowed; }
+.btn-secondary { background: var(--paper); color: var(--ink-soft); border: 1px solid var(--line); }
+.btn-secondary:hover { border-color: var(--sage); color: var(--sage-deep); }
+
+/* 진료과 선택 카드형 */
+.option-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.option-card {
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 18px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.option-card:hover { border-color: var(--sage); }
+.option-card.selected { border-color: var(--sage-deep); background: var(--sage-pale); }
+.option-card input { display: none; }
+.option-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.option-desc { font-size: 13px; color: var(--ink-soft); }
+
+/* 의사 목록 */
+.doctor-list { display: flex; flex-direction: column; gap: 10px; }
+.doctor-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.doctor-card:hover { border-color: var(--sage); }
+.doctor-card.selected { border-color: var(--sage-deep); background: var(--sage-pale); }
+.doctor-card input { display: none; }
+.doctor-name { font-size: 15px; font-weight: 600; }
+.doctor-specialty { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+.doctor-badge {
+  font-size: 12px;
+  color: var(--sage-deep);
+  background: var(--sage-pale);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* 시간 슬롯 */
+.slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.slot-btn {
+  font-size: 14px;
+  padding: 12px 0;
+  text-align: center;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--paper);
+  transition: border-color .15s, background .15s;
+}
+.slot-btn:hover { border-color: var(--sage); }
+.slot-btn.selected { border-color: var(--sage-deep); background: var(--sage-deep); color: var(--ivory); }
+.slot-btn.disabled { color: var(--line); border-color: var(--line); cursor: not-allowed; background: var(--ivory); text-decoration: line-through; }
+
+.date-picker-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 24px; }
+.date-chip {
+  flex-shrink: 0;
+  min-width: 64px;
+  text-align: center;
+  padding: 10px 6px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.date-chip .dow { color: var(--ink-soft); font-size: 11px; }
+.date-chip .dnum { font-weight: 600; font-size: 16px; margin: 2px 0; }
+.date-chip.selected { border-color: var(--sage-deep); background: var(--sage-deep); color: var(--ivory); }
+.date-chip.selected .dow { color: var(--sage-pale); }
+
+/* 완료 화면 */
+.complete-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--sage-pale);
+  color: var(--sage-deep);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+}
+.summary-table { width: 100%; border-top: 1px solid var(--line); margin-top: 20px; }
+.summary-row {
+  display: flex; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid var(--line);
+  font-size: 14.5px;
+}
+.summary-row .k { color: var(--ink-soft); }
+.summary-row .v { font-weight: 500; }
+.reservation-code {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--sage-deep);
+  letter-spacing: 0.04em;
+  margin: 24px 0;
+}
+
+/* 목록형 페이지 (예약조회, 진료기록) */
+.list-header { margin-bottom: 28px; }
+.list-header h1 { font-family: var(--font-display); font-size: 28px; font-weight: 600; margin-bottom: 8px; }
+.list-header p { font-size: 14px; color: var(--ink-soft); }
+
+.search-bar { display: flex; gap: 10px; margin-bottom: 28px; }
+.search-bar .field-input { flex: 1; margin: 0; }
+.search-bar .btn { flex: 0 0 auto; padding: 0 24px; }
+
+.record-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.record-card:hover { border-color: var(--sage); }
+.record-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.record-date { font-size: 15px; font-weight: 600; }
+.status-pill { font-size: 12px; padding: 4px 12px; border-radius: 20px; font-weight: 500; }
+.status-done { background: var(--sage-pale); color: var(--sage-deep); }
+.status-confirmed { background: #FCEBEB; color: #A32D2D; }
+.status-cancelled { background: var(--line); color: var(--ink-soft); }
+.record-meta { font-size: 14px; color: var(--ink-soft); }
+.record-meta b { color: var(--ink); font-weight: 500; }
+
+.detail-panel {
+  background: var(--sage-paler);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-top: 14px;
+  font-size: 14px;
+  display: none;
+}
+.record-card.open .detail-panel { display: block; }
+.detail-row { display: flex; gap: 10px; margin-bottom: 8px; }
+.detail-row .dk { color: var(--ink-soft); flex: 0 0 64px; }
+
+.rx-card {
+  background: var(--paper);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-top: 10px;
+}
+.rx-name { font-weight: 600; font-size: 14.5px; margin-bottom: 4px; }
+.rx-meta { font-size: 13px; color: var(--ink-soft); }
+
+.empty-state { text-align: center; padding: 60px 0; color: var(--ink-soft); }
+
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; padding-top: 56px; }
+  .hero-figure { display: none; }
+  .hero h1 { font-size: 32px; }
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
+  .dept-list { grid-template-columns: repeat(2, 1fr); }
+  .topnav { gap: 18px; }
+  .slot-grid { grid-template-columns: repeat(3, 1fr); }
+  .step-label { display: none; }
+}

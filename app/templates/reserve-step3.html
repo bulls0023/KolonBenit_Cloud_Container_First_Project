@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>의사 선택 — 예약하기 3/5</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="brand">
+      <span class="brand-mark">해담</span><span class="brand-sub">의원</span>
+    </a>
+    <nav class="topnav">
+      <a href="/">홈</a>
+      <a href="/reserve/step1" class="active">예약하기</a>
+      <a href="/reserve/lookup">예약조회</a>
+      <a href="/records">진료기록</a>
+    </nav>
+  </div>
+</header>
+
+<main class="flow-shell">
+  <div class="stepper">
+    <div class="step-dot-wrap done"><div class="step-dot">✓</div><span class="step-label">환자정보</span></div>
+    <div class="step-line done"></div>
+    <div class="step-dot-wrap done"><div class="step-dot">✓</div><span class="step-label">진료과</span></div>
+    <div class="step-line done"></div>
+    <div class="step-dot-wrap current"><div class="step-dot">3</div><span class="step-label">의사선택</span></div>
+    <div class="step-line"></div>
+    <div class="step-dot-wrap"><div class="step-dot">4</div><span class="step-label">날짜시간</span></div>
+    <div class="step-line"></div>
+    <div class="step-dot-wrap"><div class="step-dot">5</div><span class="step-label">완료</span></div>
+  </div>
+
+  <div class="flow-card">
+    <h2 id="dept-title">의사를 선택해주세요</h2>
+    <p class="flow-sub">전문분야를 확인하고 원하는 의사를 선택하세요</p>
+
+    <div class="doctor-list" id="doctor-list"></div>
+
+    <div class="btn-row">
+      <a href="/reserve/step2" class="btn btn-secondary">이전</a>
+      <button class="btn btn-primary" id="next-btn" onclick="goNext()" disabled>다음 단계</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const dept = sessionStorage.getItem('reservation_dept');
+if (!dept) { window.location.href = '/reserve/step2'; }
+
+document.getElementById('dept-title').textContent = `${dept} 의사를 선택해주세요`;
+
+const list = document.getElementById('doctor-list');
+
+async function loadDoctors() {
+  try {
+    const res = await fetch(`/api/doctors?dept=${encodeURIComponent(dept)}`);
+    const doctors = await res.json();
+    renderDoctors(doctors);
+  } catch (e) {
+    list.innerHTML = '<p class="empty-state">의사 목록을 불러오지 못했습니다</p>';
+  }
+}
+
+function renderDoctors(doctors) {
+  list.innerHTML = '';
+  doctors.forEach(doc => {
+    const card = document.createElement('label');
+    card.className = 'doctor-card';
+    card.dataset.doctorId = doc.doctor_id;
+    card.dataset.doctorName = doc.name;
+    card.innerHTML = `
+      <div>
+        <input type="radio" name="doctor">
+        <div class="doctor-name">${doc.name}</div>
+        <div class="doctor-specialty">${doc.specialty} 전문</div>
+      </div>
+      <span class="doctor-badge">예약 가능</span>
+    `;
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.doctor-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      card.querySelector('input').checked = true;
+      document.getElementById('next-btn').disabled = false;
+    });
+    list.appendChild(card);
+  });
+
+  if (doctors.length === 0) {
+    list.innerHTML = '<p class="empty-state">현재 예약 가능한 의사가 없습니다</p>';
+  }
+}
+
+loadDoctors();
+
+function goNext() {
+  const selected = document.querySelector('.doctor-card.selected');
+  sessionStorage.setItem('reservation_doctor_id', selected.dataset.doctorId);
+  sessionStorage.setItem('reservation_doctor_name', selected.dataset.doctorName);
+  window.location.href = '/reserve/step4';
+}
+</script>
+
+</body>
+</html>

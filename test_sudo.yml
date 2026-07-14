@@ -1,0 +1,8 @@
+---
+- hosts: all
+  become: true
+  tasks:
+  - name: system_test
+    command: whoami
+    register: result
+  - debug: var=result.stdout

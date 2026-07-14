@@ -1,0 +1,11 @@
+---
+- hosts: 10.10.1.110
+  become: true
+  tasks:
+    - name: Initialize Kubernetes cluster
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=10.10.1.110
+      register: kubeadm_init_output
+
+    - name: Show kubeadm init output
+      debug:
+        var: kubeadm_init_output.stdout_lines

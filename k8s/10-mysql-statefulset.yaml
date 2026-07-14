@@ -1,0 +1,123 @@
+# =====================================================================
+# MySQL StatefulSet with Local PV — DB 워커 노드(10.10.1.10)에 고정
+#
+# 적용 전 확인할 것:
+#   1) kubectl get nodes 로 DB 노드의 실제 NAME(hostname) 확인 후
+#      아래 nodeAffinity의 db 을 그 값으로 교체
+#   2) DB 노드에 미리 디렉토리 생성: sudo mkdir -p /mnt/data/mysql
+#   3) docs/schema.sql, docs/init_data.sql 로 아래 ConfigMap 내용 채워서 적용
+#      (예: kubectl create configmap mysql-initdb -n hospital
+#             --from-file=docs/schema.sql --from-file=docs/init_data.sql
+#           로 만들면 이 파일의 ConfigMap 블록은 생략 가능)
+# =====================================================================
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-local-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/data/mysql
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - db   # kubectl get nodes 결과로 교체
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc
+  namespace: hospital
+spec:
+  clusterIP: None   # headless — mysql-0.mysql-svc.hospital.svc.cluster.local 로 접근
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: hospital
+spec:
+  serviceName: mysql-svc
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: db   # kubectl get nodes 결과로 교체
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_PASSWORD
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: mysql-initdb
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+      volumes:
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb   # docs/ 의 schema.sql, init_data.sql 로 생성 (README 참고)
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-storage
+        resources:
+          requests:
+            storage: 5Gi
